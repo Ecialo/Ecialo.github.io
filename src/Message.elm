@@ -1,5 +1,16 @@
 module Message exposing (..)
 
 
+type alias RecipePath =
+    List String
+
+
 type Message
-    = AddIngridient { recipe_id : String, name : String, amount : Float }
+    = AddIngridient RecipePath
+    | ChangeIngridientName RecipePath String
+    | ChangeIngridientAmount RecipePath String
+    | ChangeRecipeType RecipePath String
+
+
+
+-- = AddIngridient { recipe_id : String, name : String, amount : Float }

@@ -1,43 +1,69 @@
-module Main exposing (Model, Msg(..), main, view)
+module Main exposing (Model, main, view)
+
+-- import Html exposing (Attribute, Html, div, input, text)
 
 import BakeForm exposing (BakeForm, newRectBakeForm, newRoundBakeForm)
 import Browser
-import Html exposing (Attribute, Html, div, input, text)
+import Dict exposing (Dict)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
+import Html.Styled exposing (..)
+import Message exposing (Message(..))
+import Recipe exposing (..)
+import Recipe.Types exposing (..)
+import Recipe.Views exposing (viewDynRecipe)
 
 
 type alias Model =
-    { from : BakeForm
-    , to : BakeForm
+    { from : DynRecipe
+    , to : DynRecipe
     }
 
 
+initialModel : Model
 initialModel =
-    { from = newRectBakeForm ( 10, 10, 10 ) False
-    , to = newRectBakeForm ( 10, 10, 10 ) False
+    { from = newDynRecipe
+    , to = newDynRecipe
     }
 
 
-type Msg
-    = Increment
-    | Decrement
-
-
-view : Model -> Html Msg
+view : Model -> Html Message
 view model =
-    div []
-        []
+    div [] [ viewDynRecipe model.from "from", viewDynRecipe model.to "to" ]
 
 
-update : Msg -> Model -> Model
+updateRecipe : List String -> (DynRecipe -> DynRecipe) -> Model -> Model
+updateRecipe recipeId mut model =
+    case recipeId of
+        "from" :: _ ->
+            { model | from = mut model.from }
+
+        "to" :: _ ->
+            { model | to = mut model.to }
+
+        _ ->
+            model
+
+
+update : Message -> Model -> Model
 update msg model =
-    model
+    case msg of
+        AddIngridient recipePath ->
+            updateRecipe recipePath addOngoingIngridient model
+
+        ChangeIngridientName recipePath name ->
+            updateRecipe recipePath (changeOngoingIngridientName name) model
+
+        ChangeIngridientAmount recipePath amount ->
+            updateRecipe recipePath (changeOngoingIngridientAmount amount) model
+
+        ChangeRecipeType recipePath _ ->
+            model
 
 
 main =
     Browser.sandbox
         { init = initialModel
-        , view = view
+        , view = view >> toUnstyled
         , update = update
         }

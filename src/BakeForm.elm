@@ -51,7 +51,7 @@ computeS (BakeForm { shape, isClosed }) =
 
 circS : Float -> S
 circS d =
-    pi * d / 4
+    pi * d * d / 4
 
 
 circumference : Float -> Float

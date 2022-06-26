@@ -1,39 +1,55 @@
 module Recipe exposing (..)
 
-import Html
-    exposing
-        ( Attribute
-        , Html
-        , button
-        , div
-        , input
-        , li
-        , text
-        , ul
-        )
-import Html.Attributes exposing (name)
-import Round
-import String exposing (fromFloat, fromInt, join)
+import Recipe.Types exposing (..)
 
 
-type alias Recipe =
-    List Ingridient
+changeOngoingIngridientAmount : String -> DynRecipe -> DynRecipe
+changeOngoingIngridientAmount amount recipe =
+    let
+        newIngrid =
+            case recipe.ongoingIngridient of
+                Nothing ->
+                    parseIngridient "Something" amount
+
+                Just (Ingridient name _) ->
+                    parseIngridient name amount
+    in
+    { recipe | ongoingIngridient = newIngrid }
 
 
-type Ingridient
-    = Ingridient String Float
+changeOngoingIngridientName : String -> DynRecipe -> DynRecipe
+changeOngoingIngridientName name recipe =
+    let
+        newIngrid =
+            case recipe.ongoingIngridient of
+                Nothing ->
+                    Just <| Ingridient name 0
+
+                Just (Ingridient _ amount) ->
+                    Just <| Ingridient name amount
+    in
+    { recipe | ongoingIngridient = newIngrid }
 
 
-viewRecipe recipe =
-    ul [] <| List.map viewIngrient recipe
+addIngridient : Ingridient -> Recipe -> Recipe
+addIngridient ingridient recipe =
+    case recipe of
+        Recipe rt ingridients ->
+            Recipe rt (ingridients ++ [ ingridient ])
+
+        _ ->
+            recipe
 
 
-viewRecipeDyn recipe recipe_id =
-    div []
-        [ viewRecipe recipe
-        , button
-        ]
+addOngoingIngridient : DynRecipe -> DynRecipe
+addOngoingIngridient dynRecipe =
+    case dynRecipe.ongoingIngridient of
+        Nothing ->
+            dynRecipe
 
-
-viewIngrient (Ingridient name amount) =
-    text <| join " " [ Round.round 2 amount, name ]
+        Just ingridient ->
+            let
+                new_recipe =
+                    addIngridient ingridient dynRecipe.recipe
+            in
+            { dynRecipe | recipe = new_recipe, ongoingIngridient = Nothing }
