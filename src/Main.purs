@@ -9,7 +9,10 @@ import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
 import Halogen.VDom.Driver (runUI)
+import Lib.Pie as Pie
 import Lib.Recipe as Recipe
+import Lib.Classes
+import Lib.Common
 
 type Slots =
   ( fromPie :: forall query output. H.Slot query output Unit
@@ -30,8 +33,8 @@ myApp = H.mkComponent
   , render: render
   }
   where
-  render _ = HH.div_ [ HH.text "Pie" ]
--- render _ = HH.div_
---   [ HH.slot_ Benefit._skillTree unit Benefit.skillTree treeShape
---   , HH.slot_ Benefit._skillTree unit Benefit.skillTree treeShape
---   ]
+  -- render _ = HH.div_ [ HH.text "Pie" ]
+  render _ = HH.div [ cls [ "container" ] ]
+    [ HH.slot_ Pie._pie "from" (Pie.pieComponent Regular) unit
+    , HH.slot_ Pie._pie "to" (Pie.pieComponent Regular) unit
+    ]

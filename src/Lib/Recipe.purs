@@ -6,6 +6,9 @@ import Prelude
 import Data.Map as M
 import Halogen as H
 import Halogen.HTML as HH
+import Halogen.HTML.Events as HE
+import Halogen.HTML.Properties (InputType(..))
+import Halogen.HTML.Properties as HP
 
 type Ingridient =
   { name :: String
@@ -13,6 +16,16 @@ type Ingridient =
   }
 
 newtype Recipe = Recipe (M.Map String Ingridient)
+
+data RecipeAction = AddNewIngridient
+type IngridientForm =
+  { name :: String
+  , amount :: Number
+  }
+
+type RecipeState =
+  { recipe :: Recipe
+  }
 
 newRecipe :: Recipe
 newRecipe = Recipe M.empty
@@ -39,3 +52,12 @@ recipeComponent = H.mkComponent
   }
   where
   render _ = HH.div_ [ HH.text "Recipe" ]
+
+  -- renderIngridient :: Ingridient -> HH.HTML w i
+
+  renderNewIngridient :: forall w. HH.HTML w RecipeAction
+  renderNewIngridient = HH.div_
+    [ HH.input [ HP.type_ InputText, HP.placeholder "Ingridient name" ]
+    , HH.input [ HP.type_ InputNumber, HP.placeholder "Amount" ]
+    , HH.button [ HE.onClick $ const AddNewIngridient ] [ HH.text "Add" ]
+    ]
