@@ -55,13 +55,13 @@ myApp = H.mkComponent
         , HH.text $ "Mult" <> show state.multiplier
         , HH.text $ "To recipe" <> show state.to
         ]
-    , HH.slot_ _frozenPie "to" frozenPieComponent state.multiplier
+    , HH.slot _frozenPie "to" frozenPieComponent state.multiplier $ fromPieOutput To
     ]
 
   handleAction = case _ of
     ChangeMetric source metric -> H.modify_ \state -> case source of
-      From -> { to: state.to, from: metric, multiplier: calcProportion state.to metric }
-      To -> { to: metric, from: state.from, multiplier: calcProportion metric state.from }
+      From -> { to: state.to, from: metric, multiplier: calcProportion metric state.to }
+      To -> { to: metric, from: state.from, multiplier: calcProportion state.from metric }
     ChangeIngredient source part ingredientAction -> case source of
       From -> case ingredientAction of
         R.IngredientUpdated ing ->

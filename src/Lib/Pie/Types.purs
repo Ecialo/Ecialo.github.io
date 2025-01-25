@@ -11,5 +11,10 @@ data PieOutput
   = ChangeMoldMetric Metric
   | ChangeIngredient RecipePart RecipeOutput
 
-data PieAction =
-  RaiseMetric Metric
+data PieAction
+  = RaiseMetric Metric
+  | RaiseIngredientChange RecipePart RecipeOutput
+
+data PieQuery a
+  = AddIngredient RecipePart Ingredient a
+  | RemoveIngredient RecipePart String a
