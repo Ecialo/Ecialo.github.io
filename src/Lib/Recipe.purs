@@ -2,13 +2,15 @@ module Lib.Recipe where
 
 import Data.Maybe
 import Prelude
-
 import Type.Proxy
+
+import Data.Array as A
 import Data.List (toUnfoldable)
 import Data.List as L
-import Data.Array as A
 import Data.Map as M
 import Data.Number (fromString)
+import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Class.Console (logShow)
 import Halogen as H
 import Halogen.HTML (li)
 import Halogen.HTML as HH
@@ -75,12 +77,13 @@ changeAmount name amount (Recipe recipe) = Recipe $ M.update (\ing -> Just $ ing
 multiplyAmount :: Number -> Recipe -> Recipe
 multiplyAmount n (Recipe recipe) = Recipe $ M.mapMaybe (\ing -> Just ing { amount = ing.amount * n }) recipe
 
-recipeComponent :: forall query input m. H.Component query input RecipeOutput m
+recipeComponent :: forall input m. MonadEffect m => H.Component RecipeQuery input RecipeOutput m
 recipeComponent = H.mkComponent
   { initialState: const newRecipeState
   , render: render
   , eval: H.mkEval $ H.defaultEval
       { handleAction = handleAction
+      , handleQuery = handleQuery
       }
   }
   where
@@ -125,9 +128,10 @@ handleAction = case _ of
     ingredient <- H.gets $ \state -> fromMaybe { name: "", amount: 0.0 } $ getIngredient name state.recipe
     H.raise $ IngredientUpdated ingredient
 
-handleQuery :: forall a m s. RecipeQuery a -> H.HalogenM RecipeState RecipeAction s RecipeOutput m (Maybe a)
+handleQuery :: forall a m s. MonadEffect m => RecipeQuery a -> H.HalogenM RecipeState RecipeAction s RecipeOutput m (Maybe a)
 handleQuery = case _ of
   UpdateIngridient ingredient next -> do
+    liftEffect $ logShow ingredient
     H.modify_ $ \state -> state { recipe = addIngredient ingredient state.recipe }
     pure $ Just next
   RemoveIngridient name next -> do

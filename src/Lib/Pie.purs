@@ -8,10 +8,12 @@ import Lib.Types
 import Prelude
 import Type.Proxy
 
-import Effect.Class (class MonadEffect)
+import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Class.Console (logShow)
 import Halogen (HalogenF(..))
 import Halogen as H
 import Halogen.HTML as HH
+import Halogen.HTML.Properties.ARIA (label)
 import Lib.Pie.Types as PT
 
 type Pie =
@@ -21,11 +23,6 @@ type Pie =
   }
 
 _pie = Proxy :: Proxy "pie"
-
-type PieSlots =
-  ( mold :: forall query. H.Slot query Metric Unit
-  , recipe :: forall query. H.Slot query RecipeOutput String
-  )
 
 pieComponent :: forall query input m. MonadEffect m => PT.KindOfPie -> H.Component query input PT.PieOutput m
 pieComponent pieKind = H.mkComponent
@@ -45,26 +42,28 @@ pieComponent pieKind = H.mkComponent
     PT.Frozen -> renderFrozenPie
     PT.Regular -> renderPie
 
-renderPie :: forall m. MonadEffect m => Pie -> H.ComponentHTML PT.PieAction PieSlots m
+renderPie :: forall m. MonadEffect m => Pie -> H.ComponentHTML PT.PieAction PT.PieSlots m
 renderPie _ = HH.div_
-  [ HH.h2_ [ HH.text "Mold" ]
+  [ HH.h2_ [ HH.text "PIE" ]
   , HH.slot _mold unit moldComponent unit PT.RaiseMetric
   , HH.slot _recipe "crust" (recipeComponent) unit $ PT.RaiseIngredientChange PT.Crust
   , HH.slot _recipe "stuff" (recipeComponent) unit $ PT.RaiseIngredientChange PT.Stuff
   ]
 
-handleQuery :: forall a m s o. PT.PieQuery a -> H.HalogenM Pie PT.PieAction s o m (Maybe a)
-handleQuery = case _ of
-  PT.AddIngredient part ing next -> do
-    -- modify_ $ \pie -> case part of
-    --   Crust -> { pie | crustRecipe = addIngredient ing pie.crustRecipe }
-    --   Stuff -> { pie | stuffRecipe = addIngredient ing pie.stuffRecipe }
-    pure $ Just next
-  PT.RemoveIngredient part name next -> do
-    -- modify_ $ \pie -> case part of
-    --   Crust -> { pie | crustRecipe = removeIngredient name pie.crustRecipe }
-    --   Stuff -> { pie | stuffRecipe = removeIngredient name pie.stuffRecipe }
-    pure $ Just next
+-- routeRecipePart ∷ PT.RecipePart → String
+-- routeRecipePart = case _ of
+--   PT.Crust -> "crust"
+--   PT.Stuff -> "stuff"
+
+-- handleQuery :: forall a m o. MonadEffect m => PT.PieQuery a -> H.HalogenM Pie PT.PieAction PieSlots o m (Maybe a)
+-- handleQuery = case _ of
+--   PT.AddIngredient part ing next -> do
+--     liftEffect $ logShow ing
+--     H.tell _recipe (routeRecipePart part) $ UpdateIngridient ing
+--     pure $ Just next
+--   PT.RemoveIngredient part name next -> do
+--     H.tell _recipe (routeRecipePart part) $ RemoveIngridient name
+--     pure $ Just next
 
 renderFrozenPie :: forall w i. Pie -> HH.HTML w i
 renderFrozenPie _ = HH.div_ [ HH.text "Pie" ]

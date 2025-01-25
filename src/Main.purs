@@ -29,11 +29,6 @@ data MainAction
   = ChangeMetric Source Metric
   | ChangeIngredient Source PT.RecipePart R.RecipeOutput
 
--- type Slots =
---   ( fromPie :: forall query output. H.Slot query output Unit
---   , toPie :: forall query output. H.Slot query output Unit
---   )
-
 main :: Effect Unit
 main = HA.runHalogenAff do
   body <- HA.awaitBody
@@ -65,9 +60,9 @@ myApp = H.mkComponent
     ChangeIngredient source part ingredientAction -> case source of
       From -> case ingredientAction of
         R.IngredientUpdated ing ->
-          H.tell _frozenPie "to" $ Pie.AddIngredient part ing
+          H.tell _frozenPie "to" $ PT.AddIngredient part ing
         R.IngredientRemoved name ->
-          H.tell _frozenPie "to" $ Pie.RemoveIngredient part name
+          H.tell _frozenPie "to" $ PT.RemoveIngredient part name
       To -> pure unit
 
 newState :: MainState
