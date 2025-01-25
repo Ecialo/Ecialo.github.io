@@ -9,12 +9,15 @@ import Type.Proxy
 
 import Control.Alternative (guard)
 import Data.Array ((!!))
-import Halogen (getRef)
+import Effect.Class (class MonadEffect)
+import Effect.Console (logShow)
+import Halogen (getRef, lift, liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties (InputType(..))
 import Halogen.HTML.Properties as HP
+import Lib.Types (Metric)
 import Web.HTML.HTMLInputElement (select)
 
 _mold = Proxy :: Proxy "mold"
@@ -24,6 +27,13 @@ data Dimension
   | Height
   | Width
   | Length
+
+instance dimensionShow :: Show Dimension where
+  show = case _ of
+    Radius -> "Radius"
+    Height -> "Height"
+    Width -> "Width"
+    Length -> "Length"
 
 data MoldForm
   = RoundMold Number Number
@@ -37,6 +47,15 @@ type Mold =
 data MoldAction
   = ChangeForm Int
   | ChangeSize Dimension String
+  | Init
+
+instance moldActionShow :: Show MoldAction where
+  show = case _ of
+    ChangeForm i -> "ChangeForm " <> show i
+    ChangeSize d n -> "ChangeSize " <> show d <> " " <> n
+    Init -> "Init"
+
+type MoldOutput = Metric
 
 calcVolume :: Mold -> Number
 calcVolume mold = case mold.form of
@@ -54,39 +73,16 @@ calcSurface mold = surface
     RectMold w l _ -> w * l
   surface = if mold.isClosed then closedSurface else closedSurface - cap
 
-moldComponent :: forall query input output m. H.Component query input output m
+moldComponent :: forall query input m. MonadEffect m => H.Component query input MoldOutput m
 moldComponent = H.mkComponent
   { initialState: const simpleMold
   , render: render
   , eval: H.mkEval $ H.defaultEval
       { handleAction = handleAction
+      , initialize = pure Init
       }
   }
   where
-  handleAction = case _ of
-    ChangeForm i -> do
-      case i of
-        0 -> H.put $ simpleMold { form = RoundMold 10.0 20.0 }
-        1 -> H.put $ simpleMold { form = RectMold 10.0 20.0 30.0 }
-        _ -> pure unit
-    ChangeSize d n -> do
-      state <- H.get
-      let
-        mVal = fromString n
-        val = fromMaybe 0.0 mVal
-      case d of
-        Radius -> case state.form of
-          RoundMold _ h -> H.put $ state { form = RoundMold val h }
-          _ -> pure unit
-        Height -> case state.form of
-          RoundMold r _ -> H.put $ state { form = RoundMold r val }
-          RectMold w l _ -> H.put $ state { form = RectMold w l val }
-        Width -> case state.form of
-          RectMold _ l h -> H.put $ state { form = RectMold val l h }
-          _ -> pure unit
-        Length -> case state.form of
-          RectMold w _ h -> H.put $ state { form = RectMold w val h }
-          _ -> pure unit
   render mold =
     let
       dimensions = case mold.form of
@@ -109,6 +105,43 @@ moldComponent = H.mkComponent
         , selector
         , dimensions
         ]
+
+computeNewmold :: Mold -> MoldAction -> Maybe Mold
+computeNewmold state = case _ of
+  Init -> Just simpleMold
+  ChangeForm i -> do
+    case i of
+      0 -> Just $ simpleMold { form = RoundMold 10.0 20.0 }
+      1 -> Just $ simpleMold { form = RectMold 10.0 20.0 30.0 }
+      _ -> Nothing
+  ChangeSize d n -> do
+    let
+      mVal = fromString n
+      val = fromMaybe 0.0 mVal
+    case d of
+      Radius -> case state.form of
+        RoundMold _ h -> Just $ state { form = RoundMold val h }
+        _ -> Nothing
+      Height -> case state.form of
+        RoundMold r _ -> Just $ state { form = RoundMold r val }
+        RectMold w l _ -> Just $ state { form = RectMold w l val }
+      Width -> case state.form of
+        RectMold _ l h -> Just $ state { form = RectMold val l h }
+        _ -> Nothing
+      Length -> case state.form of
+        RectMold w _ h -> Just $ state { form = RectMold w val h }
+        _ -> Nothing
+
+handleAction :: forall s m. MonadEffect m => MoldAction -> H.HalogenM Mold MoldAction s MoldOutput m Unit
+handleAction action = do
+  state <- H.get
+  let mNewMold = computeNewmold state action
+  case mNewMold of
+    Just newMold -> do
+      let metric = { surface: calcSurface newMold, volume: calcVolume newMold }
+      H.put newMold
+      H.raise $ metric
+    Nothing -> pure unit
 
 simpleMold :: Mold
 simpleMold = { form: RoundMold 10.0 20.0, isClosed: true }

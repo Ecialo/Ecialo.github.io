@@ -2,4 +2,4 @@ module Lib.Common where
 
 import Prelude
 
-data KindOfPie = Frozen | Regular
+-- data KindOfPie = Frozen | Regular

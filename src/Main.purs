@@ -1,8 +1,14 @@
 module Main where
 
+import Data.Tuple.Nested
+import Lib.Classes
+import Lib.Common
 import Prelude
 
+import Data.Generic.Rep (from)
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
+import Effect.Class (class MonadEffect)
 import Effect.Console (log)
 import Halogen (query)
 import Halogen as H
@@ -10,31 +16,68 @@ import Halogen.Aff as HA
 import Halogen.HTML as HH
 import Halogen.VDom.Driver (runUI)
 import Lib.Pie as Pie
-import Lib.Recipe as Recipe
-import Lib.Classes
-import Lib.Common
+import Lib.Pie.Frozen (_frozenPie, frozenPieComponent)
+import Lib.Pie.Types as PT
+import Lib.Recipe as R
+import Lib.Types (Metric, calcProportion)
 
-type Slots =
-  ( fromPie :: forall query output. H.Slot query output Unit
-  , toPie :: forall query output. H.Slot query output Unit
-  )
+data Source = From | To
+
+type MainState = { from :: Metric, to :: Metric, multiplier :: Metric }
+
+data MainAction
+  = ChangeMetric Source Metric
+  | ChangeIngredient Source PT.RecipePart R.RecipeOutput
+
+-- type Slots =
+--   ( fromPie :: forall query output. H.Slot query output Unit
+--   , toPie :: forall query output. H.Slot query output Unit
+--   )
 
 main :: Effect Unit
 main = HA.runHalogenAff do
   body <- HA.awaitBody
   runUI myApp unit body
 
-myApp :: forall query input output m. H.Component query input output m
+myApp :: forall query input output m. MonadEffect m => H.Component query input output m
 myApp = H.mkComponent
-  { initialState: const unit
+  { initialState: const newState
   , eval: H.mkEval $ H.defaultEval
-      { handleAction = \_ -> pure unit
+      { handleAction = handleAction
       }
   , render: render
   }
   where
-  -- render _ = HH.div_ [ HH.text "Pie" ]
-  render _ = HH.div [ cls [ "container" ] ]
-    [ HH.slot_ Pie._pie "from" (Pie.pieComponent Regular) unit
-    , HH.slot_ Pie._pie "to" (Pie.pieComponent Regular) unit
+  render state = HH.div [ cls [ "container" ] ]
+    [ HH.slot Pie._pie "from" (Pie.pieComponent PT.Regular) unit $ fromPieOutput From
+    , HH.div_
+        [ HH.text $ "From recipe" <> show state.from
+        , HH.text $ "Mult" <> show state.multiplier
+        , HH.text $ "To recipe" <> show state.to
+        ]
+    , HH.slot_ _frozenPie "to" frozenPieComponent state.multiplier
     ]
+
+  handleAction = case _ of
+    ChangeMetric source metric -> H.modify_ \state -> case source of
+      From -> { to: state.to, from: metric, multiplier: calcProportion state.to metric }
+      To -> { to: metric, from: state.from, multiplier: calcProportion metric state.from }
+    ChangeIngredient source part ingredientAction -> case source of
+      From -> case ingredientAction of
+        R.IngredientUpdated ing ->
+          H.tell _frozenPie "to" $ Pie.AddIngredient part ing
+        R.IngredientRemoved name ->
+          H.tell _frozenPie "to" $ Pie.RemoveIngredient part name
+      To -> pure unit
+
+newState :: MainState
+newState =
+  { from: { surface: 0.0, volume: 0.0 }
+  , to: { surface: 0.0, volume: 0.0 }
+  , multiplier: { surface: 1.0, volume: 1.0 }
+  }
+
+fromPieOutput :: Source -> PT.PieOutput -> MainAction
+fromPieOutput source pieOutput = case pieOutput of
+  (PT.ChangeMoldMetric metric) -> ChangeMetric source metric
+  (PT.ChangeIngredient rP rO) -> ChangeIngredient source rP rO
