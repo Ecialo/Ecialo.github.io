@@ -2,3 +2,5 @@
 output/
 .psc-ide-port
 .purs-repl
+.psci_modules/
+index.js
