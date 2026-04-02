@@ -13,7 +13,6 @@ import Lib.Recipe (emptyRecipe)
 import Miso
 import Miso.Html
 import Miso.Lens
-import RIO hiding (Lens, lens, (^.))
 import View
 
 app :: App Model Action

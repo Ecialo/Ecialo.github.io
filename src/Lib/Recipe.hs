@@ -2,16 +2,16 @@ module Lib.Recipe where
 
 import Lib.Mold
 import Miso.Prelude
-import Miso.String (Text, empty)
+import Miso.String (empty)
 
 data Amount = Amount
     { value :: Double
-    , unit :: Text
+    , unit :: MisoString
     }
     deriving (Show, Eq)
 
 data Ingredient = Ingredient
-    { ingredientName :: Text
+    { ingredientName :: MisoString
     , ingredientQuantity :: Amount
     }
     deriving (Show, Eq)
@@ -24,9 +24,9 @@ data RecipeForm = PieRecipe
     deriving (Show, Eq)
 
 data Recipe = Recipe
-    { recipeName :: Text
+    { recipeName :: MisoString
     , recipeForm :: RecipeForm
-    , recipeInstructions :: Text
+    , recipeInstructions :: MisoString
     }
     deriving (Show, Eq)
 

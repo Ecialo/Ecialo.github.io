@@ -1,7 +1,7 @@
 {
 
   inputs = {
-    miso.url = "github:dmjio/miso";
+    miso.url = "github:dmjio/miso/a854d79d22582a4ab27048474f6ceb2b9b7ddcdb";
   };
 
   outputs = inputs:

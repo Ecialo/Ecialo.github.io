@@ -8,16 +8,16 @@ update:
 	wasm32-wasi-cabal update
 
 repl: update
-	wasm32-wasi-cabal repl app -finteractive --repl-options='-fghci-browser -fghci-browser-port=8080'
+	wasm32-wasi-cabal repl homepage-exe -finteractive --repl-options='-fghci-browser -fghci-browser-port=8080'
 
 watch:
-	ghciwatch --after-startup-ghci :main --after-reload-ghci :main --watch app/*.hs --debounce 50ms --command 'wasm32-wasi-cabal repl app -finteractive --repl-options="-fghci-browser -fghci-browser-port=8080"'
+	ghciwatch --after-startup-ghci :main --after-reload-ghci :main --watch app/*.hs --debounce 50ms --command 'wasm32-wasi-cabal repl homepage-exe -finteractive --repl-options="-fghci-browser -fghci-browser-port=8080"'
 
 build:
 	wasm32-wasi-cabal build 
 	rm -rf public
 	cp -r static public
-	$(eval my_wasm=$(shell wasm32-wasi-cabal list-bin app | tail -n 1))
+	$(eval my_wasm=$(shell wasm32-wasi-cabal list-bin homepage-exe | tail -n 1))
 	$(shell wasm32-wasi-ghc --print-libdir)/post-link.mjs --input $(my_wasm) --output public/ghc_wasm_jsffi.js
 	cp -v $(my_wasm) public/
 
