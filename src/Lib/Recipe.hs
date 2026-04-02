@@ -36,9 +36,17 @@ emptyRecipe =
         { recipeName = empty
         , recipeForm =
             PieRecipe
-                { recipeMold = RectMold{width = 0, depth = 0, height = 0, isOpen = False}
+                { recipeMold = Mold{shape = Rect{width = 0, depth = 0, height = 0}, isOpen = False}
                 , recipeCrust = []
                 , recipeFilling = []
                 }
         , recipeInstructions = empty
+        }
+
+emptyRecipeForm :: RecipeForm
+emptyRecipeForm =
+    PieRecipe
+        { recipeMold = Mold{shape = Rect{width = 0, depth = 0, height = 0}, isOpen = False}
+        , recipeCrust = []
+        , recipeFilling = []
         }
