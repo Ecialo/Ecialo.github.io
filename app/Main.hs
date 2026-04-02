@@ -6,6 +6,7 @@ module Main where
 ----------------------------------------------------------------------------
 
 import Lib
+import Miso
 
 ----------------------------------------------------------------------------
 
@@ -13,7 +14,11 @@ import Lib
 
 -- | Entry point for a miso application
 main :: IO ()
-main = runM
+#ifdef INTERACTIVE
+main = reload defaultEvents app
+#else
+main = startApp defaultEvents app
+#endif
 
 ----------------------------------------------------------------------------
 

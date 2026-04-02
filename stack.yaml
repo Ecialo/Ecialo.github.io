@@ -44,7 +44,7 @@ packages:
 # extra-deps: []
 extra-deps:
   - github: dmjio/miso
-    commit: 6025020392bcc53db9621e72a244fa81ca51d71a
+    commit: a854d79d22582a4ab27048474f6ceb2b9b7ddcdb
 # Override default flag values for project packages and extra-deps
 # flags: {}
 

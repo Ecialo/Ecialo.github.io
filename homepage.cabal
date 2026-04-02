@@ -31,6 +31,10 @@ flag wasm
 library
   exposed-modules:
       Lib
+      Lib.Ingridient
+      Lib.Mold
+      Lib.Recipe
+      View
   other-modules:
       Paths_homepage
   autogen-modules:
@@ -46,13 +50,14 @@ library
       TypeFamilies
       TypeApplications
       StrictData
+      NoImplicitPrelude
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
     , miso
+    , rio
     , time
   default-language: Haskell2010
-  if flag(wasm)
 
 executable homepage-exe
   main-is: Main.hs
@@ -67,9 +72,9 @@ executable homepage-exe
       base >=4.7 && <5
     , homepage
     , miso
+    , rio
     , time
   default-language: Haskell2010
-  if flag(wasm)
 
 test-suite homepage-test
   type: exitcode-stdio-1.0
@@ -84,7 +89,8 @@ test-suite homepage-test
   build-depends:
       base >=4.7 && <5
     , homepage
+    , hspec
     , miso
+    , rio
     , time
   default-language: Haskell2010
-  if flag(wasm)
