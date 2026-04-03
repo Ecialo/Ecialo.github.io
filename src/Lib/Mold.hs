@@ -1,27 +1,56 @@
+{-# LANGUAGE LambdaCase #-}
+
 module Lib.Mold where
 
+import Miso.Lens
 import Miso.Prelude
 
 data Shape
-    = Round {radius :: Double, height :: Double}
-    | Rect {width :: Double, depth :: Double, height :: Double}
+    = Round {_radius :: Double, _height :: Double}
+    | Rect {_width :: Double, _depth :: Double, _height :: Double}
     deriving (Show, Eq)
 
+radius :: Lens Shape Double
+radius = lens _radius $ \s r -> case s of
+    Round _ _ -> s{_radius = r}
+    rect@(Rect{}) -> rect
+
+height :: Lens Shape Double
+height = lens _height $ \s h -> case s of
+    Round _ _ -> s{_height = h}
+    Rect w d _ -> s{_height = h}
+
+width :: Lens Shape Double
+width = lens _width $ \s w -> case s of
+    Rect _ d h -> s{_width = w}
+    round@(Round{}) -> round
+
+depth :: Lens Shape Double
+depth = lens _depth $ \s d -> case s of
+    Rect w _ h -> s{_depth = d}
+    round@(Round{}) -> round
+
 emptyRound :: Shape
-emptyRound = Round{radius = 0, height = 0}
+emptyRound = Round{_radius = 0, _height = 0}
 
 emptyRect :: Shape
-emptyRect = Rect{width = 0, depth = 0, height = 0}
+emptyRect = Rect{_width = 0, _depth = 0, _height = 0}
 
 instance Semigroup Shape where
-    (Round{radius = r1, height = h1}) <> (Round{radius = r2, height = h2}) = Round{radius = r1 + r2, height = h1 + h2}
-    (Rect{width = w1, depth = d1, height = h1}) <> (Rect{width = w2, depth = d2, height = h2}) = Rect{width = w1 + w2, depth = d1 + d2, height = h1 + h2}
+    (Round{_radius = r1, _height = h1}) <> (Round{_radius = r2, _height = h2}) = Round{_radius = r1 + r2, _height = h1 + h2}
+    (Rect{_width = w1, _depth = d1, _height = h1}) <> (Rect{_width = w2, _depth = d2, _height = h2}) = Rect{_width = w1 + w2, _depth = d1 + d2, _height = h1 + h2}
     _ <> _ = error "Cannot combine different shapes"
 instance Monoid Shape where
     mempty = Rect 0 0 0
 
-data Mold = Mold {shape :: Shape, isOpen :: Bool}
+data Mold = Mold {_shape :: Shape, _isOpen :: Bool}
     deriving (Show, Eq)
+
+shape :: Lens Mold Shape
+shape = lens _shape $ \s sh -> s{_shape = sh}
+
+isOpen :: Lens Mold Bool
+isOpen = lens _isOpen $ \s o -> s{_isOpen = o}
 
 computeVolume :: Mold -> Double
 computeVolume (Mold (Round r h) _) = pi * r ^ 2 * h

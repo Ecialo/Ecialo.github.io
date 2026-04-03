@@ -9,14 +9,14 @@ module Lib (app) where
 
 import Data.Int
 import Data.Time.Clock
-import Lib.Recipe (emptyRecipe, emptyRecipeForm)
+import Lib.Recipe (emptyRecipe, emptyRecipeForm, testRecipe)
 import Miso
 import Miso.Html
 import Miso.Lens
 import View
 
 app :: App Model Action
-app = component emptyRecipeForm updateModel viewModel
+app = component (recipeStateFromRecipe testRecipe) updateModel viewModel
 
 -- { styles = [Href "./static/index.css" (True :: CacheBust)]
 -- }

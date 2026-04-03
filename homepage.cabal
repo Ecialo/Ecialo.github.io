@@ -56,10 +56,11 @@ flag wasm
 library
   exposed-modules:
       Lib
-      Lib.Ingridient
+      Lib.Ingredient
       Lib.Mold
       Lib.Recipe
       View
+      View.Types
   other-modules:
       Paths_homepage
   autogen-modules:
