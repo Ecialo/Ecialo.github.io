@@ -22,8 +22,8 @@ build:
 	cp -v $(my_wasm) public/
 
 optim:
-	wasm-opt -all -O2 public/app.wasm -o public/app.wasm
-	wasm-tools strip -o public/app.wasm public/app.wasm
+	wasm-opt -all -O2 public/homepage-exe.wasm -o public/homepage-exe.wasm
+	wasm-tools strip -o public/homepage-exe.wasm public/homepage-exe.wasm
 
 serve:
 	http-server public

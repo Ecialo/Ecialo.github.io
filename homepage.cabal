@@ -59,6 +59,8 @@ library
       Lib.Ingredient
       Lib.Mold
       Lib.Recipe
+      Lib.ECS
+      Game
       View
       View.Types
   other-modules:
@@ -82,6 +84,8 @@ library
       base >=4.7 && <5
     , miso
     , time
+    , apecs
+    , apecs-physics
   default-language: GHC2021
 
 

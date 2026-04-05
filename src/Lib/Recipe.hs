@@ -27,6 +27,21 @@ data RecipeForm = PieRecipe
     }
     deriving (Show, Eq)
 
+applySurfaceScaling :: Double -> RecipeForm -> RecipeForm
+applySurfaceScaling coef recipe =
+    recipe{_recipeCrust = applyIngridientsScaling coef (_recipeCrust recipe)}
+
+applyVolumeScaling :: Double -> RecipeForm -> RecipeForm
+applyVolumeScaling coef recipe =
+    recipe{_recipeFilling = applyIngridientsScaling coef (_recipeFilling recipe)}
+
+applyIngridientsScaling :: Double -> [Ingredient] -> [Ingredient]
+applyIngridientsScaling = map . scaleIngredient
+  where
+    scaleIngredient :: Double -> Ingredient -> Ingredient
+    scaleIngredient coef (Ingredient name (Amount value unit)) =
+        Ingredient name (Amount (value * coef) unit)
+
 recipeMold :: Lens RecipeForm Mold
 recipeMold = lens _recipeMold $ \s m -> s{_recipeMold = m}
 

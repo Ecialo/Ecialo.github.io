@@ -16,6 +16,8 @@ data Action
     = SetMold Mold
     | UpdateMoldChecked Bool
     | UpdateMoldShape Shape
+    | Recalculate
+    deriving (Show, Eq)
 type Model = RecipeState
 
 handleAction :: Action -> Effect parent Model Action
@@ -23,9 +25,24 @@ handleAction = \case
     SetMold mold -> this . leftRecipe . recipeForm . recipeMold .= mold
     UpdateMoldChecked isOpen' -> this . leftRecipe . recipeForm . recipeMold . isOpen .= isOpen'
     UpdateMoldShape shape' -> this . leftRecipe . recipeForm . recipeMold . shape .= shape'
+    Recalculate -> do
+        leftMold <- use (this . leftRecipe . recipeForm . recipeMold)
+        rightMold <- use (this . rightRecipe . recipeForm . recipeMold)
+        let surfaceCoef' = computeSurfaceArea leftMold / computeSurfaceArea rightMold
+            volumeCoef' = computeVolume leftMold / computeVolume rightMold
+        this . surfaceCoef .= surfaceCoef'
+        this . volumeCoef .= volumeCoef'
+        this . rightRecipe . recipeForm %= applySurfaceScaling surfaceCoef'
+        this . rightRecipe . recipeForm %= applyVolumeScaling volumeCoef'
 
 recipeStateFromRecipe :: Recipe -> RecipeState
-recipeStateFromRecipe recipe = RecipeState{_leftRecipe = recipe, _rightRecipe = recipe}
+recipeStateFromRecipe recipe =
+    RecipeState
+        { _leftRecipe = recipe
+        , _rightRecipe = recipe
+        , _surfaceCoef = 1
+        , _volumeCoef = 1
+        }
 
 updateWithRect :: Double -> Double -> Double -> Action
 updateWithRect w d h = UpdateMoldShape $ Rect{_width = w, _depth = d, _height = h}

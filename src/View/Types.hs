@@ -9,6 +9,8 @@ import Miso.Prelude
 data RecipeState = RecipeState
     { _leftRecipe :: Recipe
     , _rightRecipe :: Recipe
+    , _surfaceCoef :: Double
+    , _volumeCoef :: Double
     }
     deriving (Show, Eq)
 
