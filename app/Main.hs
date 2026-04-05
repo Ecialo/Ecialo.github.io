@@ -11,12 +11,13 @@ module Main where
 import Lib
 import Miso
 import Miso.CSS (StyleSheet)
-import qualified Miso.CSS as CSS
+import Miso.CSS qualified as CSS
 import Miso.Html.Element as H
 import Miso.Html.Event as E
 import Miso.Html.Property as P
 import Miso.Lens
 import Miso.String
+import Paths_homepage qualified as HomepagePaths
 
 -----------------------------------------------------------------------------
 data Action
@@ -41,9 +42,13 @@ foreign export javascript "hs_start" main :: IO ()
 
 main :: IO ()
 #ifdef INTERACTIVE
-main = do 
+main = do
     app <- makeCalculatorApp
-    reload defaultEvents app
+    -- css <- readFile "./static/index.css"
+    -- reload defaultEvents (app {styles = [Style (ms css)]})
+    -- p <- HomepagePaths.getDataFileName "static/index.css"
+    
+    reload defaultEvents (app {styles = [Href ("/Users/zloe_aloe/lambda/Ecialo.github.io/static/index.css") (False :: CacheBust)]})
 #else
 main = do
     app <- makeCalculatorApp

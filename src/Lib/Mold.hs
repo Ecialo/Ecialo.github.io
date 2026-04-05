@@ -61,7 +61,7 @@ computeSurfaceArea (Mold (Round r h) isOpen) = 2 * pi * r * (r + h) - if isOpen 
 computeSurfaceArea (Mold (Rect w d h) isOpen) = 2 * (w * d + w * h + d * h) - if isOpen then w * d else 0
 
 surfaceCoefficient :: Mold -> Mold -> Double
-surfaceCoefficient mold1 mold2 = computeSurfaceArea mold1 / computeSurfaceArea mold2
+surfaceCoefficient mold1 mold2 = computeSurfaceArea mold2 / computeSurfaceArea mold1
 
 volumeCoefficient :: Mold -> Mold -> Double
-volumeCoefficient mold1 mold2 = computeVolume mold1 / computeVolume mold2
+volumeCoefficient mold1 mold2 = computeVolume mold2 / computeVolume mold1

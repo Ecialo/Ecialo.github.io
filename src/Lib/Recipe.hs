@@ -12,7 +12,9 @@ data Amount = Amount
     deriving (Show, Eq)
 
 instance ToMisoString Amount where
-    toMisoString (Amount v u) = toMisoString v <> " " <> u
+    toMisoString (Amount v u) = toMisoString (roundTo2 v) <> " " <> u
+      where
+        roundTo2 x = fromIntegral (round (x * 100) :: Int) / 100
 
 data Ingredient = Ingredient
     { ingredientName :: MisoString

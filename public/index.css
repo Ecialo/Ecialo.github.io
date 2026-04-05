@@ -1,3 +1,197 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
-    background-color: #0074D9;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f0f2f5;
+    color: #1a1a2e;
+    line-height: 1.5;
+}
+
+.calculator {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 16px;
+}
+
+.title {
+    text-align: center;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #16213e;
+}
+
+.recipe-name {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 24px;
+}
+
+/* ── Mold panels (top row) ── */
+
+.molds-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.mold-panel {
+    flex: 1;
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.mold-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #16213e;
+}
+
+.mold-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.mold-controls select {
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 0.9rem;
+}
+
+.shape-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.input-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.88rem;
+}
+
+.input-row input[type="number"] {
+    width: 90px;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.88rem;
+    text-align: right;
+}
+
+/* ── Recipe columns (middle row) ── */
+
+.recipe-row {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.recipe-panel {
+    flex: 1;
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.panel-header {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #16213e;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.arrows {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 24px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #0074D9;
+    white-space: nowrap;
+}
+
+/* ── Ingredient groups ── */
+
+.ingredient-group {
+    margin-bottom: 16px;
+}
+
+.ingredient-group:last-child {
+    margin-bottom: 0;
+}
+
+.group-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.ingredient-list {
+    list-style: none;
+}
+
+.ingredient-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 4px 0;
+    border-bottom: 1px dashed #e8e8e8;
+    font-size: 0.9rem;
+}
+
+.ingredient-item:last-child {
+    border-bottom: none;
+}
+
+.ingredient-name {
+    color: #333;
+    padding-right: 12px;
+}
+
+.ingredient-quantity {
+    color: #0074D9;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ── Instructions (bottom) ── */
+
+.instructions {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.instructions-text {
+    font-size: 0.92rem;
+    white-space: pre-line;
+    color: #444;
 }
