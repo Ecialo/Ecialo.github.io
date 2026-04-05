@@ -28,8 +28,8 @@ handleAction = \case
     Recalculate -> do
         leftMold <- use (this . leftRecipe . recipeForm . recipeMold)
         rightMold <- use (this . rightRecipe . recipeForm . recipeMold)
-        let surfaceCoef' = computeSurfaceArea leftMold / computeSurfaceArea rightMold
-            volumeCoef' = computeVolume leftMold / computeVolume rightMold
+        let surfaceCoef' = surfaceCoefficient leftMold rightMold
+            volumeCoef' = volumeCoefficient leftMold rightMold
         this . surfaceCoef .= surfaceCoef'
         this . volumeCoef .= volumeCoef'
         this . rightRecipe . recipeForm %= applySurfaceScaling surfaceCoef'
