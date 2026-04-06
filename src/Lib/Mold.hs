@@ -31,10 +31,10 @@ depth = lens _depth $ \s d -> case s of
     round@(Round{}) -> round
 
 emptyRound :: Shape
-emptyRound = Round{_radius = 0, _height = 0}
+emptyRound = Round{_radius = 10, _height = 5}
 
 emptyRect :: Shape
-emptyRect = Rect{_width = 0, _depth = 0, _height = 0}
+emptyRect = Rect{_width = 20, _depth = 20, _height = 5}
 
 instance Semigroup Shape where
     (Round{_radius = r1, _height = h1}) <> (Round{_radius = r2, _height = h2}) = Round{_radius = r1 + r2, _height = h1 + h2}

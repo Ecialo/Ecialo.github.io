@@ -29,6 +29,7 @@ data Action
     | SetNewIngredientUnit Section MisoString
     | AddIngredient Section
     | RemoveIngredient Section Int
+    | ClearRecipe
     deriving (Show, Eq)
 
 type Model = RecipeState
@@ -107,6 +108,14 @@ updateModel = \case
         ings <- use (this . ingLens)
         this . ingLens .= removeAt idx ings
         recalc
+    ClearRecipe -> do
+        leftMold' <- use (this . leftRecipe . recipeForm . recipeMold)
+        rightMold' <- use (this . rightRecipe . recipeForm . recipeMold)
+        this . leftRecipe .= Recipe{_recipeName = mempty, _recipeForm = PieRecipe{_recipeMold = leftMold', _recipeCrust = [], _recipeFilling = []}, _recipeInstructions = mempty}
+        this . rightRecipe .= Recipe{_recipeName = mempty, _recipeForm = PieRecipe{_recipeMold = rightMold', _recipeCrust = [], _recipeFilling = []}, _recipeInstructions = mempty}
+        this . newCrust .= NewIngredient mempty mempty mempty
+        this . newFilling .= NewIngredient mempty mempty mempty
+        recalc
   where
     recalc = do
         leftCrust <- use (this . leftRecipe . recipeForm . recipeCrust)
@@ -124,7 +133,10 @@ viewModel :: Model -> View Model Action
 viewModel RecipeState{_leftRecipe, _rightRecipe, _surfaceCoef, _volumeCoef, _newCrust, _newFilling} =
     div_ [class_ "calculator"]
         [ h1_ [class_ "title"] [text "Калькулятор рецептов"]
-        , h2_ [class_ "recipe-name"] [text (_recipeName _leftRecipe)]
+        , div_ [class_ "recipe-name-row"]
+            [ h2_ [class_ "recipe-name"] [text (_recipeName _leftRecipe)]
+            , button_ [onClick ClearRecipe, class_ "clear-btn"] [text "Очистить"]
+            ]
         , div_ [class_ "molds-row"]
             [ viewMoldPanel L "Оригинальная форма" (_recipeMold (_recipeForm _leftRecipe))
             , viewMoldPanel R "Целевая форма" (_recipeMold (_recipeForm _rightRecipe))
@@ -229,11 +241,16 @@ fromInputToAction action rawInput = case fromMisoStringEither rawInput of
     Right num -> action num
     Left _ -> action 0
 
+defaultRound :: Shape
+defaultRound = Round{_radius = 10, _height = 5}
+
+defaultRect :: Shape
+defaultRect = Rect{_width = 20, _depth = 20, _height = 5}
+
 fromStringToMold :: Side -> MisoString -> Action
 fromStringToMold side s = case s of
-    "CircleMold" -> SetMold side $ Mold{_shape = Round{_radius = 0, _height = 0}, _isOpen = False}
-    "RectMold" -> SetMold side $ Mold{_shape = Rect{_width = 0, _depth = 0, _height = 0}, _isOpen = False}
-    _ -> SetMold side $ Mold{_shape = Rect{_width = 0, _depth = 0, _height = 0}, _isOpen = False}
+    "CircleMold" -> SetMold side $ Mold{_shape = defaultRound, _isOpen = False}
+    _ -> SetMold side $ Mold{_shape = defaultRect, _isOpen = False}
 
 updateIngredientValueAt :: Int -> Double -> [Ingredient] -> [Ingredient]
 updateIngredientValueAt idx val = go 0

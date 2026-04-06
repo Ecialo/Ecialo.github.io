@@ -80,7 +80,7 @@ recipeInstructions = lens _recipeInstructions $ \s i -> s{_recipeInstructions = 
 emptyRecipeForm :: RecipeForm
 emptyRecipeForm =
     PieRecipe
-        { _recipeMold = Mold{_shape = Rect{_width = 0, _depth = 0, _height = 0}, _isOpen = False}
+        { _recipeMold = Mold{_shape = Rect{_width = 20, _depth = 20, _height = 5}, _isOpen = False}
         , _recipeCrust = []
         , _recipeFilling = []
         }

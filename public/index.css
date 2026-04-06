@@ -25,12 +25,33 @@ body {
     color: #16213e;
 }
 
+.recipe-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
 .recipe-name {
-    text-align: center;
     font-size: 1.2rem;
     font-weight: 500;
     color: #555;
-    margin-bottom: 24px;
+}
+
+.clear-btn {
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 0.82rem;
+    color: #888;
+    cursor: pointer;
+}
+
+.clear-btn:hover {
+    border-color: #e44;
+    color: #e44;
 }
 
 /* ── Mold panels (top row) ── */
