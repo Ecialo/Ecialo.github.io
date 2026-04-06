@@ -155,7 +155,7 @@ viewModel RecipeState{_leftRecipe, _rightRecipe, _surfaceCoef, _volumeCoef, _new
         ]
 
 formatCoef :: Double -> MisoString
-formatCoef = toMisoString
+formatCoef x = toMisoString (fromIntegral (round (x * 10) :: Int) / 10)
 
 viewMoldPanel :: Side -> MisoString -> Mold -> View Model Action
 viewMoldPanel side lbl Mold{_shape, _isOpen} =
@@ -248,14 +248,14 @@ viewEditableIngredientGroup section lbl ingredients newIng =
 viewEditableIngredient :: Section -> Int -> Ingredient -> View Model Action
 viewEditableIngredient section idx Ingredient{ingredientName, ingredientQuantity} =
     li_ [class_ "ingredient-item"]
-        [ span_ [class_ "ingredient-name"] [text ingredientName]
+        [ button_ [onClick (RemoveIngredient section idx)] [text "\215"]
+        , span_ [class_ "ingredient-name"] [text ingredientName]
         , input_
             [ type_ "number"
             , value_ (toMisoString (value ingredientQuantity))
             , onChange (EditIngredientValue section idx)
             ]
         , span_ [class_ "ingredient-unit"] [text (unit ingredientQuantity)]
-        , button_ [onClick (RemoveIngredient section idx)] [text "\215"]
         ]
 
 viewAddIngredientForm :: Section -> NewIngredient -> View Model Action
