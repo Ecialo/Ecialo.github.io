@@ -6,7 +6,7 @@ import Lib.Mold
 import Lib.Recipe
 import Miso
 import Miso.Html
-import Miso.Html.Property (checked_, class_, placeholder_, type_, value_)
+import Miso.Html.Property (checked_, class_, name_, placeholder_, type_, value_)
 import Miso.Lens
 import Miso.Prelude
 import Miso.String hiding (map, zipWith)
@@ -162,7 +162,7 @@ viewMoldPanel side lbl Mold{_shape, _isOpen} =
     div_ [class_ "mold-panel"]
         [ h3_ [class_ "mold-title"] [text lbl]
         , moldSelector side
-        , isOpenCheckbox side _isOpen
+        , isOpenToggle side _isOpen
         , viewShape side _shape
         ]
 
@@ -177,15 +177,27 @@ moldSelector side =
             ]
         ]
 
-isOpenCheckbox :: Side -> Bool -> View Model Action
-isOpenCheckbox side isChecked =
-    label_ [class_ "mold-controls"]
-        [ input_
-            [ type_ "checkbox"
-            , checked_ isChecked
-            , onChecked (\(Checked b) -> UpdateMoldChecked side b)
+isOpenToggle :: Side -> Bool -> View Model Action
+isOpenToggle side isOpen' =
+    div_ [class_ "pie-toggle"]
+        [ label_ [class_ "pie-toggle-option"]
+            [ input_
+                [ type_ "radio"
+                , name_ (case side of L -> "isOpenL"; R -> "isOpenR")
+                , checked_ isOpen'
+                , onChecked (\(Checked _) -> UpdateMoldChecked side True)
+                ]
+            , text " открытый"
             ]
-        , text " Открытая форма"
+        , label_ [class_ "pie-toggle-option"]
+            [ input_
+                [ type_ "radio"
+                , name_ (case side of L -> "isOpenL"; R -> "isOpenR")
+                , checked_ (not isOpen')
+                , onChecked (\(Checked _) -> UpdateMoldChecked side False)
+                ]
+            , text " закрытый"
+            ]
         ]
 
 viewShape :: Side -> Shape -> View Model Action

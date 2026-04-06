@@ -71,6 +71,27 @@ body {
     font-size: 0.9rem;
 }
 
+/* ── Pie open/closed toggle (radio) ── */
+
+.pie-toggle {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.pie-toggle-option {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.pie-toggle-option input[type="radio"] {
+    margin: 0;
+    accent-color: #0074D9;
+}
+
 .shape-inputs {
     display: flex;
     flex-direction: column;
