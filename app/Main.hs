@@ -48,7 +48,7 @@ main = do
     -- reload defaultEvents (app {styles = [Style (ms css)]})
     -- p <- HomepagePaths.getDataFileName "static/index.css"
     
-    reload defaultEvents (app {styles = [Href ("/Users/zloe_aloe/lambda/Ecialo.github.io/static/index.css") (False :: CacheBust)]})
+    reload defaultEvents (app {styles = [Href ("https://raw.githubusercontent.com/Ecialo/Ecialo.github.io/refs/heads/miso/static/index.css") (False :: CacheBust)]})
 #else
 main = do
     app <- makeCalculatorApp

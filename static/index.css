@@ -159,8 +159,8 @@ body {
 
 .ingredient-item {
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
+    gap: 6px;
     padding: 4px 0;
     border-bottom: 1px dashed #e8e8e8;
     font-size: 0.9rem;
@@ -172,13 +172,91 @@ body {
 
 .ingredient-name {
     color: #333;
-    padding-right: 12px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ingredient-item input[type="number"] {
+    width: 64px;
+    padding: 2px 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.ingredient-unit {
+    color: #888;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ingredient-item button {
+    background: none;
+    border: none;
+    color: #ccc;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 2px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.ingredient-item button:hover {
+    color: #e44;
 }
 
 .ingredient-quantity {
     color: #0074D9;
     font-weight: 600;
     white-space: nowrap;
+}
+
+.add-ingredient-form {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+    align-items: center;
+}
+
+.add-ingredient-form input[type="text"] {
+    width: 80px;
+    padding: 3px 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.82rem;
+}
+
+.add-ingredient-form input[type="number"] {
+    width: 56px;
+    padding: 3px 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    text-align: right;
+}
+
+.add-ingredient-form button {
+    background: #0074D9;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.add-ingredient-form button:hover {
+    background: #005bb5;
 }
 
 /* ── Instructions (bottom) ── */

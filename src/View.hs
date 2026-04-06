@@ -6,13 +6,16 @@ import Lib.Mold
 import Lib.Recipe
 import Miso
 import Miso.Html
-import Miso.Html.Property (checked_, class_, type_, value_)
+import Miso.Html.Property (checked_, class_, placeholder_, type_, value_)
 import Miso.Lens
 import Miso.Prelude
-import Miso.String hiding (map)
+import Miso.String hiding (map, zipWith)
 import View.Types
 
 data Side = L | R
+    deriving (Show, Eq)
+
+data Section = Crust | Filling
     deriving (Show, Eq)
 
 data Action
@@ -20,6 +23,12 @@ data Action
     | UpdateMoldChecked Side Bool
     | UpdateMoldShape Side Shape
     | Recalculate
+    | EditIngredientValue Section Int MisoString
+    | SetNewIngredientName Section MisoString
+    | SetNewIngredientValue Section MisoString
+    | SetNewIngredientUnit Section MisoString
+    | AddIngredient Section
+    | RemoveIngredient Section Int
     deriving (Show, Eq)
 
 type Model = RecipeState
@@ -31,6 +40,8 @@ recipeStateFromRecipe recipe =
         , _rightRecipe = recipe
         , _surfaceCoef = 1
         , _volumeCoef = 1
+        , _newCrust = NewIngredient mempty mempty mempty
+        , _newFilling = NewIngredient mempty mempty mempty
         }
 
 updateWithRect :: Side -> Double -> Double -> Double -> Action
@@ -57,6 +68,45 @@ updateModel = \case
             R -> this . rightRecipe . recipeForm . recipeMold . shape .= shape'
         recalc
     Recalculate -> recalc
+    EditIngredientValue section idx rawValue -> do
+        let val = case fromMisoStringEither rawValue of
+                Right num -> num
+                Left _ -> 0.0
+        let ingLens = case section of
+                Crust -> leftRecipe . recipeForm . recipeCrust
+                Filling -> leftRecipe . recipeForm . recipeFilling
+        ings <- use (this . ingLens)
+        this . ingLens .= updateIngredientValueAt idx val ings
+        recalc
+    SetNewIngredientName section name' -> case section of
+        Crust -> this . newCrust . niName .= name'
+        Filling -> this . newFilling . niName .= name'
+    SetNewIngredientValue section val -> case section of
+        Crust -> this . newCrust . niValue .= val
+        Filling -> this . newFilling . niValue .= val
+    SetNewIngredientUnit section unit' -> case section of
+        Crust -> this . newCrust . niUnit .= unit'
+        Filling -> this . newFilling . niUnit .= unit'
+    AddIngredient section -> do
+        let (newLens, ingLens) = case section of
+                Crust -> (newCrust, leftRecipe . recipeForm . recipeCrust)
+                Filling -> (newFilling, leftRecipe . recipeForm . recipeFilling)
+        ni <- use (this . newLens)
+        let val = case fromMisoStringEither (ni ^. niValue) of
+                Right num -> num
+                Left _ -> 0.0
+        let ingredient = Ingredient (ni ^. niName) (Amount val (ni ^. niUnit))
+        ings <- use (this . ingLens)
+        this . ingLens .= ings ++ [ingredient]
+        this . newLens .= NewIngredient mempty mempty mempty
+        recalc
+    RemoveIngredient section idx -> do
+        let ingLens = case section of
+                Crust -> leftRecipe . recipeForm . recipeCrust
+                Filling -> leftRecipe . recipeForm . recipeFilling
+        ings <- use (this . ingLens)
+        this . ingLens .= removeAt idx ings
+        recalc
   where
     recalc = do
         leftCrust <- use (this . leftRecipe . recipeForm . recipeCrust)
@@ -71,7 +121,7 @@ updateModel = \case
         this . rightRecipe . recipeForm . recipeFilling .= applyIngridientsScaling volumeCoef' leftFilling
 
 viewModel :: Model -> View Model Action
-viewModel RecipeState{_leftRecipe, _rightRecipe, _surfaceCoef, _volumeCoef} =
+viewModel RecipeState{_leftRecipe, _rightRecipe, _surfaceCoef, _volumeCoef, _newCrust, _newFilling} =
     div_ [class_ "calculator"]
         [ h1_ [class_ "title"] [text "Калькулятор рецептов"]
         , h2_ [class_ "recipe-name"] [text (_recipeName _leftRecipe)]
@@ -82,8 +132,8 @@ viewModel RecipeState{_leftRecipe, _rightRecipe, _surfaceCoef, _volumeCoef} =
         , div_ [class_ "recipe-row"]
             [ div_ [class_ "recipe-panel"]
                 [ h3_ [class_ "panel-header"] [text "Оригинальный"]
-                , viewIngredientGroup "Тесто (Crust)" (_recipeCrust (_recipeForm _leftRecipe))
-                , viewIngredientGroup "Начинка (Filling)" (_recipeFilling (_recipeForm _leftRecipe))
+                , viewEditableIngredientGroup Crust "Тесто (Crust)" (_recipeCrust (_recipeForm _leftRecipe)) _newCrust
+                , viewEditableIngredientGroup Filling "Начинка (Filling)" (_recipeFilling (_recipeForm _leftRecipe)) _newFilling
                 ]
             , div_ [class_ "arrows"]
                 [ div_ [class_ "arrow"]
@@ -172,6 +222,65 @@ fromStringToMold side s = case s of
     "CircleMold" -> SetMold side $ Mold{_shape = Round{_radius = 0, _height = 0}, _isOpen = False}
     "RectMold" -> SetMold side $ Mold{_shape = Rect{_width = 0, _depth = 0, _height = 0}, _isOpen = False}
     _ -> SetMold side $ Mold{_shape = Rect{_width = 0, _depth = 0, _height = 0}, _isOpen = False}
+
+updateIngredientValueAt :: Int -> Double -> [Ingredient] -> [Ingredient]
+updateIngredientValueAt idx val = go 0
+  where
+    go _ [] = []
+    go i (x : xs)
+        | i == idx = x{ingredientQuantity = (ingredientQuantity x){value = val}} : xs
+        | otherwise = x : go (i + 1) xs
+
+removeAt :: Int -> [a] -> [a]
+removeAt _ [] = []
+removeAt idx (x : xs)
+    | idx == 0 = xs
+    | otherwise = x : removeAt (idx - 1) xs
+
+viewEditableIngredientGroup :: Section -> MisoString -> [Ingredient] -> NewIngredient -> View Model Action
+viewEditableIngredientGroup section lbl ingredients newIng =
+    div_ [class_ "ingredient-group"]
+        [ h4_ [class_ "group-title"] [text lbl]
+        , ul_ [class_ "ingredient-list"] $ zipWith (viewEditableIngredient section) [0 ..] ingredients
+        , viewAddIngredientForm section newIng
+        ]
+
+viewEditableIngredient :: Section -> Int -> Ingredient -> View Model Action
+viewEditableIngredient section idx Ingredient{ingredientName, ingredientQuantity} =
+    li_ [class_ "ingredient-item"]
+        [ span_ [class_ "ingredient-name"] [text ingredientName]
+        , input_
+            [ type_ "number"
+            , value_ (toMisoString (value ingredientQuantity))
+            , onChange (EditIngredientValue section idx)
+            ]
+        , span_ [class_ "ingredient-unit"] [text (unit ingredientQuantity)]
+        , button_ [onClick (RemoveIngredient section idx)] [text "\215"]
+        ]
+
+viewAddIngredientForm :: Section -> NewIngredient -> View Model Action
+viewAddIngredientForm section NewIngredient{_niName, _niValue, _niUnit} =
+    div_ [class_ "add-ingredient-form"]
+        [ input_
+            [ type_ "text"
+            , value_ _niName
+            , placeholder_ "Название"
+            , onChange (SetNewIngredientName section)
+            ]
+        , input_
+            [ type_ "number"
+            , value_ _niValue
+            , placeholder_ "Кол-во"
+            , onChange (SetNewIngredientValue section)
+            ]
+        , input_
+            [ type_ "text"
+            , value_ _niUnit
+            , placeholder_ "Единица"
+            , onChange (SetNewIngredientUnit section)
+            ]
+        , button_ [onClick (AddIngredient section)] [text "+"]
+        ]
 
 viewIngredientGroup :: MisoString -> [Ingredient] -> View Model Action
 viewIngredientGroup lbl ingredients =
