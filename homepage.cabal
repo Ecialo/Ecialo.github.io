@@ -1,0 +1,131 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.38.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           homepage
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/homepage#readme>
+homepage:       https://github.com/githubuser/homepage#readme
+bug-reports:    https://github.com/githubuser/homepage/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2025 Author name here
+license:        BSD-3-Clause
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    CHANGELOG.md
+data-files:
+    static/index.css
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/homepage
+
+flag interactive
+  default:
+    False
+  manual:
+    True
+
+common warnings
+  ghc-options:
+    -funbox-strict-fields -O2 -ferror-spans -fspecialise-aggressively -Wall
+
+common options
+  if arch(wasm32)
+    ghc-options:
+      -no-hs-main -optl-mexec-model=reactor "-optl-Wl,--export=hs_start"
+    cpp-options:
+      -DWASM
+    if flag (interactive)
+      cpp-options:
+        -DINTERACTIVE
+
+  if arch(javascript)
+     ld-options:
+       -sEXPORTED_RUNTIME_METHODS=HEAP8
+
+
+flag wasm
+  description: Build the WASM executable
+  manual: True
+  default: False
+
+library
+  exposed-modules:
+      Lib
+      Lib.Ingredient
+      Lib.Mold
+      Lib.Recipe
+      Lib.ECS
+      Game
+      View
+      View.Types
+  other-modules:
+      Paths_homepage
+  autogen-modules:
+      Paths_homepage
+  hs-source-dirs:
+      src
+  default-extensions:
+      MultiWayIf
+      OverloadedStrings
+      GADTs
+      FlexibleContexts
+      FlexibleInstances
+      TypeFamilies
+      TypeApplications
+      StrictData
+      NoImplicitPrelude
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      base >=4.7 && <5
+    , miso
+    , time
+    , apecs
+    , apecs-physics
+  default-language: GHC2021
+
+
+executable homepage-exe
+  import:
+     options, warnings
+  main-is: Main.hs
+  other-modules:
+      Paths_homepage
+  autogen-modules:
+      Paths_homepage
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      base >=4.7 && <5
+    , homepage
+    , miso
+    , time
+  default-language: GHC2021
+
+test-suite homepage-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_homepage
+  autogen-modules:
+      Paths_homepage
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , homepage
+    , hspec
+    , miso
+    , time
+  default-language: GHC2021
+  build-tool-depends: hspec-discover:hspec-discover == 2.*
+
+

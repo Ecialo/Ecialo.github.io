@@ -1,0 +1,97 @@
+name: homepage
+version: 0.1.0.0
+github: "githubuser/homepage"
+license: BSD-3-Clause
+author: "Author name here"
+maintainer: "example@example.com"
+copyright: "2025 Author name here"
+
+extra-source-files:
+  - README.md
+  - CHANGELOG.md
+
+flags:
+  wasm:
+    description: Build the WASM executable
+    default: false
+    manual: true
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description: Please see the README on GitHub at <https://github.com/githubuser/homepage#readme>
+
+dependencies:
+  - base >= 4.7 && < 5
+  - miso
+  - time
+
+ghc-options:
+  - -Wall
+  - -Wcompat
+  - -Widentities
+  - -Wincomplete-record-updates
+  - -Wincomplete-uni-patterns
+  - -Wmissing-export-lists
+  - -Wmissing-home-modules
+  - -Wpartial-fields
+  - -Wredundant-constraints
+
+library:
+  source-dirs: src
+  default-extensions:
+    - MultiWayIf
+    - OverloadedStrings
+    - GADTs
+    - FlexibleContexts
+    - FlexibleInstances
+    - TypeFamilies
+    - TypeApplications
+    - StrictData
+    - NoImplicitPrelude
+
+executables:
+  homepage-exe:
+    main: Main.hs
+    source-dirs: app
+    # ghc-options:
+    #   - -no-hs-main
+    #   - -optl-mexec-model=reactor
+    #   - "-optl-Wl,--export=hs_start"
+    # cpp-options:
+    #   - -DWASM
+    dependencies:
+      - homepage
+
+# when:
+#   - condition: flag(wasm)
+#     executables:
+#       homepage-wasm-exe:
+#         main: Main.hs
+#         source-dirs: app
+#         ghc-options:
+#           - -no-hs-main
+#           - -optl-mexec-model=reactor
+#           - "-optl-Wl,--export=hs_start"
+#         cpp-options:
+#           - -DWASM
+#         dependencies:
+#           - homepage
+
+tests:
+  homepage-test:
+    main: Spec.hs
+    source-dirs: test
+    verbatim:
+      build-tool-depends: hspec-discover:hspec-discover == 2.*
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - homepage
+      - hspec

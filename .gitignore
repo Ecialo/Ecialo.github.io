@@ -2,3 +2,8 @@
 output/
 .psc-ide-port
 .purs-repl
+.psci_modules/
+.stack-work
+.playwright-cli/
+dist-newstyle
+_tmp_gh_pages

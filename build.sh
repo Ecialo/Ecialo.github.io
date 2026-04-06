@@ -1,0 +1,1 @@
+nix develop --command bash -c "make build"
