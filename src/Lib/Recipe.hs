@@ -1,20 +1,19 @@
 module Lib.Recipe where
 
+import Lib.Ingredient
 import Lib.Mold
 import Miso.Lens
 import Miso.Prelude
 import Miso.String (ToMisoString, empty)
 
 data Amount = Amount
-    { value :: Double
-    , unit :: MisoString
+    { value :: Int
+    , unit :: Unit
     }
     deriving (Show, Eq)
 
 instance ToMisoString Amount where
-    toMisoString (Amount v u) = toMisoString (roundTo2 v) <> " " <> u
-      where
-        roundTo2 x = fromIntegral (round (x * 100) :: Int) / 100
+    toMisoString (Amount v u) = toMisoString v <> " " <> toMisoString u
 
 data Ingredient = Ingredient
     { ingredientName :: MisoString
@@ -41,8 +40,8 @@ applyIngridientsScaling :: Double -> [Ingredient] -> [Ingredient]
 applyIngridientsScaling = map . scaleIngredient
   where
     scaleIngredient :: Double -> Ingredient -> Ingredient
-    scaleIngredient coef (Ingredient name (Amount value unit)) =
-        Ingredient name (Amount (value * coef) unit)
+    scaleIngredient coef (Ingredient name (Amount val unit)) =
+        Ingredient name (Amount (round (fromIntegral val * coef)) unit)
 
 recipeMold :: Lens RecipeForm Mold
 recipeMold = lens _recipeMold $ \s m -> s{_recipeMold = m}
@@ -93,28 +92,28 @@ testRecipe =
             PieRecipe
                 { _recipeMold = Mold{_shape = Round{_radius = 4.5, _height = 2.5}, _isOpen = False}
                 , _recipeCrust =
-                    [ Ingredient "Мука (универсальная пшеничная)" (Amount 3 "стакана (375 г)")
-                    , Ingredient "Соль" (Amount 0.5 "чайной ложки")
-                    , Ingredient "Сливочное масло" (Amount 1 "стакан (226 г), нарезанное и сильно охлажденное")
-                    , Ingredient "Холодная вода" (Amount 0.5 "стакана (118 мл)")
-                    , Ingredient "Яйцо" (Amount 1 "шт (взбитое, для смазывания)")
+                    [ Ingredient "Мука (универсальная пшеничная)" (Amount 375 Gram)
+                    , Ingredient "Соль" (Amount 3 Gram)
+                    , Ingredient "Сливочное масло" (Amount 226 Gram)
+                    , Ingredient "Холодная вода" (Amount 118 Ml)
+                    , Ingredient "Яйцо" (Amount 1 Piece)
                     ]
                 , _recipeFilling =
-                    [ Ingredient "Говядина (лопатка или грудинка)" (Amount 900 "г")
-                    , Ingredient "Растительное масло" (Amount 2 "ст. ложки")
-                    , Ingredient "Сливочное масло" (Amount 1 "ст. ложка")
-                    , Ingredient "Лук" (Amount 1 "средняя")
-                    , Ingredient "Морковь" (Amount 2 "крупные")
-                    , Ingredient "Чеснок" (Amount 2 "зубчика")
-                    , Ingredient "Томатная паста" (Amount 2 "ст. ложки")
-                    , Ingredient "Вустерширский соус" (Amount 2 "ст. ложки")
-                    , Ingredient "Мука" (Amount 2 "ст. ложки")
-                    , Ingredient "Темный эль" (Amount 0.75 "стакана (177 мл)")
-                    , Ingredient "Говяжий бульон" (Amount 0.5 "стакана (118 мл)")
-                    , Ingredient "Тимьян" (Amount 0.5 "чайной ложки (свежий, мелко нарезанный)")
-                    , Ingredient "Розмарин" (Amount 0.5 "чайной ложки (свежий, мелко нарезанный)")
-                    , Ingredient "Соль" (Amount 1 "чайная ложка")
-                    , Ingredient "Молотый черный перец" (Amount 0.25 "чайной ложки")
+                    [ Ingredient "Говядина (лопатка или грудинка)" (Amount 900 Gram)
+                    , Ingredient "Растительное масло" (Amount 30 Ml)
+                    , Ingredient "Сливочное масло" (Amount 15 Gram)
+                    , Ingredient "Лук" (Amount 1 Piece)
+                    , Ingredient "Морковь" (Amount 2 Piece)
+                    , Ingredient "Чеснок" (Amount 2 Piece)
+                    , Ingredient "Томатная паста" (Amount 30 Gram)
+                    , Ingredient "Вустерширский соус" (Amount 30 Ml)
+                    , Ingredient "Мука" (Amount 16 Gram)
+                    , Ingredient "Темный эль" (Amount 177 Ml)
+                    , Ingredient "Говяжий бульон" (Amount 118 Ml)
+                    , Ingredient "Тимьян" (Amount 1 Gram)
+                    , Ingredient "Розмарин" (Amount 1 Gram)
+                    , Ingredient "Соль" (Amount 5 Gram)
+                    , Ingredient "Молотый черный перец" (Amount 1 Gram)
                     ]
                 }
         , _recipeInstructions =

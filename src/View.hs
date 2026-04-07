@@ -2,6 +2,7 @@
 
 module View where
 
+import Lib.Ingredient
 import Lib.Mold
 import Lib.Recipe
 import Miso
@@ -72,7 +73,7 @@ updateModel = \case
     EditIngredientValue section idx rawValue -> do
         let val = case fromMisoStringEither rawValue of
                 Right num -> num
-                Left _ -> 0.0
+                Left _ -> (0 :: Int)
         let ingLens = case section of
                 Crust -> leftRecipe . recipeForm . recipeCrust
                 Filling -> leftRecipe . recipeForm . recipeFilling
@@ -95,8 +96,8 @@ updateModel = \case
         ni <- use (this . newLens)
         let val = case fromMisoStringEither (ni ^. niValue) of
                 Right num -> num
-                Left _ -> 0.0
-        let ingredient = Ingredient (ni ^. niName) (Amount val (ni ^. niUnit))
+                Left _ -> (0 :: Int)
+        let ingredient = Ingredient (ni ^. niName) (Amount val (parseUnit (ni ^. niUnit)))
         ings <- use (this . ingLens)
         this . ingLens .= ings ++ [ingredient]
         this . newLens .= NewIngredient mempty mempty mempty
@@ -252,7 +253,7 @@ fromStringToMold side s = case s of
     "CircleMold" -> SetMold side $ Mold{_shape = defaultRound, _isOpen = False}
     _ -> SetMold side $ Mold{_shape = defaultRect, _isOpen = False}
 
-updateIngredientValueAt :: Int -> Double -> [Ingredient] -> [Ingredient]
+updateIngredientValueAt :: Int -> Int -> [Ingredient] -> [Ingredient]
 updateIngredientValueAt idx val = go 0
   where
     go _ [] = []
@@ -284,7 +285,7 @@ viewEditableIngredient section idx Ingredient{ingredientName, ingredientQuantity
             , value_ (toMisoString (value ingredientQuantity))
             , onChange (EditIngredientValue section idx)
             ]
-        , span_ [class_ "ingredient-unit"] [text (unit ingredientQuantity)]
+        , span_ [class_ "ingredient-unit"] [text (toMisoString (unit ingredientQuantity))]
         ]
 
 viewAddIngredientForm :: Section -> NewIngredient -> View Model Action
@@ -302,11 +303,11 @@ viewAddIngredientForm section NewIngredient{_niName, _niValue, _niUnit} =
             , placeholder_ "Кол-во"
             , onChange (SetNewIngredientValue section)
             ]
-        , input_
-            [ type_ "text"
-            , value_ _niUnit
-            , placeholder_ "Единица"
-            , onChange (SetNewIngredientUnit section)
+        , select_
+            [onChange (SetNewIngredientUnit section)]
+            [ option_ [value_ "Gram"] [text "г"]
+            , option_ [value_ "Ml"] [text "мл"]
+            , option_ [value_ "Piece"] [text "шт"]
             ]
         , button_ [onClick (AddIngredient section)] [text "+"]
         ]
