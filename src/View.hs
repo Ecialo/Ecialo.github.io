@@ -132,36 +132,45 @@ updateModel = \case
 
 viewModel :: Model -> View Model Action
 viewModel RecipeState{_leftRecipe, _rightRecipe, _surfaceCoef, _volumeCoef, _newCrust, _newFilling} =
-    div_ [class_ "calculator"]
-        [ h1_ [class_ "title"] [text "Калькулятор рецептов"]
-        , div_ [class_ "recipe-name-row"]
+    div_
+        [class_ "calculator"]
+        [ h1_ [class_ "title"] [text "Recipe Calculator"]
+        , div_
+            [class_ "recipe-name-row"]
             [ h2_ [class_ "recipe-name"] [text (_recipeName _leftRecipe)]
-            , button_ [onClick ClearRecipe, class_ "clear-btn"] [text "Очистить"]
+            , button_ [onClick ClearRecipe, class_ "clear-btn"] [text "Clear"]
             ]
-        , div_ [class_ "molds-row"]
-            [ viewMoldPanel L "Оригинальная форма" (_recipeMold (_recipeForm _leftRecipe))
-            , viewMoldPanel R "Целевая форма" (_recipeMold (_recipeForm _rightRecipe))
+        , div_
+            [class_ "molds-row"]
+            [ viewMoldPanel L "Original Mold" (_recipeMold (_recipeForm _leftRecipe))
+            , viewMoldPanel R "Target Mold" (_recipeMold (_recipeForm _rightRecipe))
             ]
-        , div_ [class_ "recipe-row"]
-            [ div_ [class_ "recipe-panel"]
-                [ h3_ [class_ "panel-header"] [text "Оригинальный"]
-                , viewEditableIngredientGroup Crust "Тесто (Crust)" (_recipeCrust (_recipeForm _leftRecipe)) _newCrust
-                , viewEditableIngredientGroup Filling "Начинка (Filling)" (_recipeFilling (_recipeForm _leftRecipe)) _newFilling
+        , div_
+            [class_ "recipe-row"]
+            [ div_
+                [class_ "recipe-panel"]
+                [ h3_ [class_ "panel-header"] [text "Original"]
+                , viewEditableIngredientGroup Crust "Crust" (_recipeCrust (_recipeForm _leftRecipe)) _newCrust
+                , viewEditableIngredientGroup Filling "Filling" (_recipeFilling (_recipeForm _leftRecipe)) _newFilling
                 ]
-            , div_ [class_ "arrows"]
-                [ div_ [class_ "arrow"]
+            , div_
+                [class_ "arrows"]
+                [ div_
+                    [class_ "arrow"]
                     [ text "Crust \8594 \215"
                     , text (formatCoef _surfaceCoef)
                     ]
-                , div_ [class_ "arrow"]
+                , div_
+                    [class_ "arrow"]
                     [ text "Filling \8594 \215"
                     , text (formatCoef _volumeCoef)
                     ]
                 ]
-            , div_ [class_ "recipe-panel"]
-                [ h3_ [class_ "panel-header"] [text "Пересчитанный"]
-                , viewIngredientGroup "Тесто (Crust)" (_recipeCrust (_recipeForm _rightRecipe))
-                , viewIngredientGroup "Начинка (Filling)" (_recipeFilling (_recipeForm _rightRecipe))
+            , div_
+                [class_ "recipe-panel"]
+                [ h3_ [class_ "panel-header"] [text "Scaled"]
+                , viewIngredientGroup "Crust" (_recipeCrust (_recipeForm _rightRecipe))
+                , viewIngredientGroup "Filling" (_recipeFilling (_recipeForm _rightRecipe))
                 ]
             ]
         , viewInstructions (_recipeInstructions _leftRecipe)
@@ -172,7 +181,8 @@ formatCoef x = toMisoString (fromIntegral (round (x * 10) :: Int) / 10)
 
 viewMoldPanel :: Side -> MisoString -> Mold -> View Model Action
 viewMoldPanel side lbl Mold{_shape, _isOpen} =
-    div_ [class_ "mold-panel"]
+    div_
+        [class_ "mold-panel"]
         [ h3_ [class_ "mold-title"] [text lbl]
         , moldSelector side
         , isOpenToggle side _isOpen
@@ -181,54 +191,61 @@ viewMoldPanel side lbl Mold{_shape, _isOpen} =
 
 moldSelector :: Side -> View Model Action
 moldSelector side =
-    div_ [class_ "mold-controls"]
-        [ text "Форма: "
+    div_
+        [class_ "mold-controls"]
+        [ text "Shape: "
         , select_
             [onChange (fromStringToMold side)]
-            [ option_ [value_ "CircleMold"] [text "Круглая"]
-            , option_ [value_ "RectMold"] [text "Прямоугольная"]
+            [ option_ [value_ "CircleMold"] [text "Circle"]
+            , option_ [value_ "RectMold"] [text "Rectangle"]
             ]
         ]
 
 isOpenToggle :: Side -> Bool -> View Model Action
 isOpenToggle side isOpen' =
-    div_ [class_ "pie-toggle"]
-        [ label_ [class_ "pie-toggle-option"]
+    div_
+        [class_ "pie-toggle"]
+        [ label_
+            [class_ "pie-toggle-option"]
             [ input_
                 [ type_ "radio"
                 , name_ (case side of L -> "isOpenL"; R -> "isOpenR")
                 , checked_ isOpen'
                 , onChecked (\(Checked _) -> UpdateMoldChecked side True)
                 ]
-            , text " открытый"
+            , text " open"
             ]
-        , label_ [class_ "pie-toggle-option"]
+        , label_
+            [class_ "pie-toggle-option"]
             [ input_
                 [ type_ "radio"
                 , name_ (case side of L -> "isOpenL"; R -> "isOpenR")
                 , checked_ (not isOpen')
                 , onChecked (\(Checked _) -> UpdateMoldChecked side False)
                 ]
-            , text " закрытый"
+            , text " closed"
             ]
         ]
 
 viewShape :: Side -> Shape -> View Model Action
 viewShape side (Rect w d h) =
-    div_ [class_ "shape-inputs"]
-        [ labeledInput "Ширина" w (\v -> updateWithRect side v d h)
-        , labeledInput "Глубина" d (\v -> updateWithRect side w v h)
-        , labeledInput "Высота" h (\v -> updateWithRect side w d v)
+    div_
+        [class_ "shape-inputs"]
+        [ labeledInput "Width" w (\v -> updateWithRect side v d h)
+        , labeledInput "Depth" d (\v -> updateWithRect side w v h)
+        , labeledInput "Height" h (\v -> updateWithRect side w d v)
         ]
 viewShape side (Round r h) =
-    div_ [class_ "shape-inputs"]
-        [ labeledInput "Радиус" r (\v -> updateWithRound side v h)
-        , labeledInput "Высота" h (\v -> updateWithRound side r v)
+    div_
+        [class_ "shape-inputs"]
+        [ labeledInput "Radius" r (\v -> updateWithRound side v h)
+        , labeledInput "Height" h (\v -> updateWithRound side r v)
         ]
 
 labeledInput :: MisoString -> Double -> (Double -> Action) -> View Model Action
 labeledInput lbl val action =
-    div_ [class_ "input-row"]
+    div_
+        [class_ "input-row"]
         [ text lbl
         , input_
             [ type_ "number"
@@ -269,7 +286,8 @@ removeAt idx (x : xs)
 
 viewEditableIngredientGroup :: Section -> MisoString -> [Ingredient] -> NewIngredient -> View Model Action
 viewEditableIngredientGroup section lbl ingredients newIng =
-    div_ [class_ "ingredient-group"]
+    div_
+        [class_ "ingredient-group"]
         [ h4_ [class_ "group-title"] [text lbl]
         , ul_ [class_ "ingredient-list"] $ zipWith (viewEditableIngredient section) [0 ..] ingredients
         , viewAddIngredientForm section newIng
@@ -277,7 +295,8 @@ viewEditableIngredientGroup section lbl ingredients newIng =
 
 viewEditableIngredient :: Section -> Int -> Ingredient -> View Model Action
 viewEditableIngredient section idx Ingredient{ingredientName, ingredientQuantity} =
-    li_ [class_ "ingredient-item"]
+    li_
+        [class_ "ingredient-item"]
         [ button_ [onClick (RemoveIngredient section idx)] [text "\215"]
         , span_ [class_ "ingredient-name"] [text ingredientName]
         , input_
@@ -290,45 +309,49 @@ viewEditableIngredient section idx Ingredient{ingredientName, ingredientQuantity
 
 viewAddIngredientForm :: Section -> NewIngredient -> View Model Action
 viewAddIngredientForm section NewIngredient{_niName, _niValue, _niUnit} =
-    div_ [class_ "add-ingredient-form"]
+    div_
+        [class_ "add-ingredient-form"]
         [ input_
             [ type_ "text"
             , value_ _niName
-            , placeholder_ "Название"
+            , placeholder_ "Name"
             , onChange (SetNewIngredientName section)
             ]
         , input_
             [ type_ "number"
             , value_ _niValue
-            , placeholder_ "Кол-во"
+            , placeholder_ "Qty"
             , onChange (SetNewIngredientValue section)
             ]
         , select_
             [onChange (SetNewIngredientUnit section)]
-            [ option_ [value_ "Gram"] [text "г"]
-            , option_ [value_ "Ml"] [text "мл"]
-            , option_ [value_ "Piece"] [text "шт"]
+            [ option_ [value_ "Gram"] [text "g"]
+            , option_ [value_ "Ml"] [text "ml"]
+            , option_ [value_ "Piece"] [text "pcs"]
             ]
         , button_ [onClick (AddIngredient section)] [text "+"]
         ]
 
 viewIngredientGroup :: MisoString -> [Ingredient] -> View Model Action
 viewIngredientGroup lbl ingredients =
-    div_ [class_ "ingredient-group"]
+    div_
+        [class_ "ingredient-group"]
         [ h4_ [class_ "group-title"] [text lbl]
         , ul_ [class_ "ingredient-list"] $ map viewIngredient ingredients
         ]
 
 viewIngredient :: Ingredient -> View Model Action
 viewIngredient Ingredient{ingredientName, ingredientQuantity} =
-    li_ [class_ "ingredient-item"]
+    li_
+        [class_ "ingredient-item"]
         [ span_ [class_ "ingredient-name"] [text ingredientName]
         , span_ [class_ "ingredient-quantity"] [text (toMisoString ingredientQuantity)]
         ]
 
 viewInstructions :: MisoString -> View Model Action
 viewInstructions instr =
-    div_ [class_ "instructions"]
-        [ h3_ [class_ "panel-header"] [text "Инструкция"]
+    div_
+        [class_ "instructions"]
+        [ h3_ [class_ "panel-header"] [text "Instructions"]
         , div_ [class_ "instructions-text"] [text instr]
         ]
