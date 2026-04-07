@@ -13,6 +13,7 @@ import Control.Concurrent (threadDelay)
 import Control.Monad
 import Data.Int
 import Data.Time.Clock
+import Game.Camera (mkCamera)
 import Game qualified as G
 import Lib.ECS (initWorld)
 import Lib.Recipe (emptyRecipe, emptyRecipeForm, testRecipe)
@@ -38,7 +39,8 @@ makeGameApp = do
         ball <- newEntity (DynamicBody, Position (V2 100 100))
         _ <- newEntity (Shape ball ballshape, Density 1)
         pure ()
-    pure $ (component (G.M w 0) G.update G.view){subs = [timerSub]}
+    let initialCam = mkCamera 0 0 1.0 400 400
+    pure $ (component (G.M w 0 initialCam) G.update G.view){subs = [timerSub]}
 
 timerSub :: Sub G.Action
 timerSub sink = forever $ (threadDelay 100) >> sink G.Tick
